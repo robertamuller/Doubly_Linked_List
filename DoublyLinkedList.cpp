@@ -19,7 +19,7 @@ void insertFront(Node**, int);
 void insertEnd(Node**, int);
 void displayList(Node*);
 void insertAfter(Node*, int);
-void insertBefore(Node*, int);
+void insertBefore(Node**, int);
 void deleteNode(Node**, Node*);
 Node* searchNodebyValue(Node**, int);
 void deleteNodebyValue(Node**, int);
@@ -33,8 +33,10 @@ int main()
     cout << "Testando função displayList: " << endl;
     cout << "Lista vazia -> ";
     displayList(emptyHead);
+    head = createNode(1);
     cout << "Lista não vazia -> ";
     displayList(head);
+
     cout << "-----------------------------------------------------" << endl;
 
     cout << "Testanto função insertEnd:" << endl;
@@ -43,45 +45,67 @@ int main()
     insertEnd(&head, 3);
     insertEnd(&head, 7);
     displayList(head);
+
     cout << "-----------------------------------------------------" << endl;
+
     cout << "Testando função insertFront:" << endl;
     insertFront(&head, 10);
     insertFront(&head, 13);
     insertFront(&head, 24);
     insertFront(&head, 42);
     displayList(head);
+
     cout << "-----------------------------------------------------" << endl;
 
     cout << "Testanto função deleteNode:" << endl;
-    Node* remove = head;
-    int iRemovePayload = 13;
-    /*
-    while (remove->iPayload != iRemovePayload || remove->ptrNext != nullptr) remove = remove->ptrNext;
-
-    if (remove->ptrNext == nullptr && remove->iPayload == iRemovePayload)
-    {
-
-    }
-    */
+    deleteNode(&head, head);
+    cout << "Deletando a head -> ";
+    displayList(head);
+    Node* remove = head->ptrNext->ptrNext->ptrNext;
+    deleteNode(&head, remove);
+    cout << "Deletando o quarto elemento (" << remove << ") -> ";
+    displayList(head);
+    
     cout << "-----------------------------------------------------" << endl;
 
     cout << "Testanto função searchNodebyValue:" << endl;
-    Node* temp = searchNodebyValue(&head, 13);
+    Node* temp = searchNodebyValue(&head, 3);
     displayList(head);
-    cout << "Endereço do Node: " << temp << endl;   
+    cout << "Endereço do Node com valor '3': " << temp << endl; 
+
     cout << "-----------------------------------------------------" << endl;
 
     cout << "Testanto função deleteNodebyValue:" << endl;
-    deleteNodebyValue(&head, 42); // Deletando nó do início da lista
     cout << "Deletando o 42 -> ";
-    displayList(head);
+    deleteNodebyValue(&head, 42); // Deletando nó do início da lista
     deleteNodebyValue(&head, 10); // Deletando nó do meio da lista
     cout << "Deletando o 10 -> ";
     displayList(head);
     deleteNodebyValue(&head, 7); // Deletando nó do fim da lista
     cout << "Deletando o 7 -> ";
     displayList(head);
+
     cout << "-----------------------------------------------------" << endl;
+    cout << "Testanto função insertAfter:" << endl;
+    insertAfter(head, 99);
+    cout << "Adicionando 99 depois da head -> ";
+    displayList(head);
+    insertAfter(temp, 100);
+    cout << "Adicionando 100 depois do node encontrado anteriormente -> ";
+    displayList(head);
+
+
+    cout << "-----------------------------------------------------" << endl;
+    
+    cout << "Testanto função insertBefore:" << endl;
+    insertBefore(&head, 42);
+    cout << "Adicionando 42 antes da head -> ";
+    displayList(head);
+    insertBefore(&temp, 7);
+    cout << "Adicionando 7 antes do node encontrado anteriormente -> ";
+    displayList(head);
+
+    free(temp);
 }
 
 Node* createNode(int iPayload)
@@ -104,7 +128,7 @@ void displayList(Node* node)
 
     if (node->ptrPrev != nullptr)
     {
-        cout << "Meio ou Fim da Lista: Não é possível realizar displayList" << endl; //Meio é qualquer nó que não esteja no começo ou no fim
+        cout << "Meio ou Fim da Lista: Não é possível realizar displayList" << endl;
         return;
     }
 
@@ -143,13 +167,13 @@ void insertEnd(Node** head, int iPayload)
 
     if (*head == nullptr)
     {
-        (*head) = newNode; // Entre parênteses pq estamos derreferenciando um ponteiro (Pinho gosta de escrever assim)
+        (*head) = newNode; // derreferenciando um ponteiro
         return;
     }
 
     Node* temp = (*head);
 
-    //Percorremos a lista até seu fim (ptrNext do último nó é NULL)
+    //Percorre a lista
     while (temp->ptrNext != nullptr) temp = temp->ptrNext;
 
     newNode->ptrPrev =  temp; //newNode aponta para o fim da lista
@@ -174,12 +198,34 @@ void insertAfter(Node* ptrLocation, int iPayLoad)
     // Corrigir o ponto de inserção
     ptrLocation->ptrNext = newNode;
 
-    if (newNode->ptrNext == nullptr) newNode->ptrNext->ptrPrev=newNode;
+    if (newNode->ptrNext != nullptr) newNode->ptrNext->ptrPrev = newNode;
 }
 
-void insertBefore(Node* ptrLocation, int iPayload)
+// recebe um nó que pode estar em qualquer lugar da lista (pode ser a head)
+void insertBefore(Node** ptrLocation, int iPayLoad) 
 {
-    
+    if (*ptrLocation == nullptr)
+    {
+        cout << "Location é NULL." << endl;
+        return;
+    }
+
+    Node* newNode = createNode(iPayLoad);
+
+    // Corrigir nó a ser inserido
+    newNode->ptrNext = *ptrLocation;
+    newNode->ptrPrev = (*ptrLocation)->ptrPrev;
+
+    // Corrigir o ponto de inserção
+    (*ptrLocation)->ptrPrev = newNode;
+
+    if (newNode->ptrPrev != nullptr) 
+    {
+        newNode->ptrPrev->ptrNext = newNode;
+    } else
+    {
+        *ptrLocation = newNode; // aponta a head pro newNode
+    }
 }
 
 void deleteNode(Node** head, Node* ptrDelete)
@@ -193,7 +239,7 @@ void deleteNode(Node** head, Node* ptrDelete)
     // Caso o ptrDelete seja o primeiro elemento da lista
     if (*head == ptrDelete) (*head) = ptrDelete->ptrNext;
 
-    // Se o ptrDelete não é o primeiro nó
+    // Se o ptrDelete não é o último nó
     if (ptrDelete->ptrNext != nullptr) ptrDelete->ptrNext->ptrPrev = ptrDelete->ptrPrev;
 
     // Se o ptrDelete não é o primeiro nó
@@ -227,17 +273,10 @@ void deleteNodebyValue(Node** head, int iPayload)
 {
     Node* temp = searchNodebyValue(head, iPayload);
 
+    // caso do valor não existir na lista
+    if (temp == (*head)) return;
+
     deleteNode(head, temp);
 
     return;
 }
-
-/* Exercícios para entregar ao monitor
-
-Exercício 1: Elaborar a função void insertBefore(Node*, int);
-
-Exercício 2: Elaborar a função void deleteNodebyValue(Node**, int);
-
-Exercício 3: Elaborar a função Node* searchNodebyValue(Node**, int);
-
-*/
