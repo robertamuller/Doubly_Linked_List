@@ -9,3 +9,8 @@ Exercise 1: Implement the function `void insertBefore(Node*, int);`
 Exercise 2: Implement the function `void deleteNodebyValue(Node**, int);`
 
 Exercise 3: Implement the function `Node* searchNodebyValue(Node**, int);` 
+
+## Made by:
+
+* [Gabriel Pavanato](https://github.com/Pavanato)
+* [Roberta Muller Nunes](https://github.com/robertamuller)
